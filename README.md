@@ -59,4 +59,4 @@ TASKS IDENTIFIED SO FAR
 7. Develop defender.
 8. Develop web application so that people can play against it.
 
-_If you are interested, drop me an email at aj.rivera@jhu.edu_
+_If you are interested, send me an email at aj.rivera@jhu.edu_
