@@ -47,6 +47,10 @@ class HumanPlayer(object):
             else:
                 return move
 
+class RandomPlayer(object):
+    def play(self, state, actions):
+        return random.choice(actions)
+
 
 #
 # BattleShip
