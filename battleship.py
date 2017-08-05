@@ -26,6 +26,10 @@ class BoardGame(Game):
         raise NotImplementedError
 
     def playGame(self, players):
+        """
+        Overrides Game.playGame()
+        
+        """
         self.startGame()
         turn = 0
 
@@ -81,6 +85,10 @@ class Battleship(BoardGame):
         return turn
 
     def startGame(self):
+        """
+        Overrides Game.startGame()
+
+        """
         board = [[0 for i in range(self.width)] for j in range(self.height)]
         board_copy = copy.deepcopy(board)
         board = self.place_ships(board)
@@ -91,6 +99,10 @@ class Battleship(BoardGame):
         state_guesses = self.get_guesses()
         turn = self.get_turn()
         turn_guesses = state_guesses[turn]
+        """
+        Overrides Game.actions()
+
+        """
 
         alphabet = string.ascii_uppercase
         actions = []
@@ -105,6 +117,10 @@ class Battleship(BoardGame):
     def transition(self, action):
         state_guesses = self.get_guesses()
         turn = self.get_turn()
+        """
+        Overrides Game.transition()
+
+        """
 
         # Update guesses
         state_guesses[turn].append(action)
@@ -131,6 +147,10 @@ class Battleship(BoardGame):
         self.state[op_turn][0] = op_board
 
     def gameOver(self):
+        """
+        Overrides Game.gameOver()
+
+        """
         boards = (self.state[0][0], self.state[1][0])
 
         for player, board in enumerate(boards):
@@ -199,13 +219,20 @@ class Battleship(BoardGame):
             board = self.place_ship(board, ship_size)
         return board
 
+        """
+        Overrides BoardGame.displayGameEnd()
 
     def displayGameEnd(self):
         winner = self.winner + 1
         print("The winner is {}".format(winner))
+        """
 
     def displayState(self):
         op_display_map = {
+        """
+        Overrides BoardGame.displayState()
+
+        """
             0: " ",
             1: " ",
             2: "X",
