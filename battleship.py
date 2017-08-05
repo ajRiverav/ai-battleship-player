@@ -200,7 +200,7 @@ class Battleship(BoardGame):
         return board
 
 
-    def displayGameEnd():
+    def displayGameEnd(self):
         winner = self.winner + 1
         print("The winner is {}".format(winner))
 
