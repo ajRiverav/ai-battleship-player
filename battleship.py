@@ -40,12 +40,14 @@ class BoardGame(Game):
 
         move = None
         while not self.gameOver():
-            self.displayState()
+            self.displayState(players)
             player = players[turn % len(players)]
             move = player.play(self.state, self.actions())
             self.transition(move)
             turn += 1
-        self.displayGameEnd()
+        self.displayGameEnd(players)
+
+
 class Player(object):
     def __init__(self, name=None):
         if name is None:
@@ -236,15 +238,14 @@ class Battleship(BoardGame):
             board = self.placeShip(board, shipSize)
         return board
 
+    def displayGameEnd(self, players):
         """
         Overrides BoardGame.displayGameEnd()
 
-    def displayGameEnd(self):
-        winner = self.winner + 1
-        print("The winner is {}".format(winner))
         """
+        print("The winner is " + players[self.winner].name)
 
-    def displayState(self):
+    def displayState(self, players):
         """
         Overrides BoardGame.displayState()
 
@@ -269,7 +270,7 @@ class Battleship(BoardGame):
         opTurn = (turn + 1) % 2
         opBoard = self.state[opTurn][0]
 
-        board_disp = "Target board\n"
+        boardDisp = players[opTurn].name + str("\n")
         head = " |"
         for i in range(1, self.width + 1):
             head += str(i) + "|"
@@ -300,5 +301,5 @@ class Battleship(BoardGame):
 
 if __name__ == "__main__":
     battleship = Battleship(10, 10)
-    players = [HumanPlayer(), HumanPlayer()]
+    players = [RandomShotsPlayer(), RandomShotsPlayer()]
     battleship.playGame(players)
