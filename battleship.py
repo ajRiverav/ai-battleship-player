@@ -53,17 +53,22 @@ class Player(object):
         else:
             self.name = name
 
+class HumanPlayer(Player):
+    def __init__(self, name=None):
+        super(HumanPlayer, self).__init__(name)
 
-class HumanPlayer(object):
     def play(self, state, actions):
         while True:
-            move = raw_input("Please enter a move: ")
+            move = raw_input(self.name + ", please enter a move: ")
             if move not in actions:
                 print("That move is not available. Try again!")
             else:
                 return move
 
-class RandomPlayer(object):
+class RandomShotsPlayer(Player):
+    def __init__(self, name=None):
+        super(RandomShotsPlayer, self).__init__(name)
+
     def play(self, state, actions):
         return random.choice(actions)
 
