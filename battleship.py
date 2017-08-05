@@ -75,13 +75,13 @@ class Battleship(BoardGame):
         self.width = width
         self.height = height
 
-    def get_guesses(self):
+    def getGuesses(self):
         return [self.state[0][1], self.state[1][1]]
 
-    def get_turn(self):
-        state_guesses = self.get_guesses()
-        num_guesses = sum(len(guesses) for guesses in state_guesses)
-        turn = num_guesses % 2
+    def getTurn(self):
+        stateGuesses = self.getGuesses()
+        numGuesses = sum(len(guesses) for guesses in stateGuesses)
+        turn = numGuesses % 2
         return turn
 
     def startGame(self):
@@ -90,61 +90,61 @@ class Battleship(BoardGame):
 
         """
         board = [[0 for i in range(self.width)] for j in range(self.height)]
-        board_copy = copy.deepcopy(board)
-        board = self.place_ships(board)
-        board_copy = self.place_ships(board_copy)
-        self.state = [[board, []], [board_copy, []]]
+        boardCopy = copy.deepcopy(board)
+        board = self.placeShips(board)
+        boardCopy = self.placeShips(boardCopy)
+        self.state = [[board, []], [boardCopy, []]]
 
     def actions(self):
-        state_guesses = self.get_guesses()
-        turn = self.get_turn()
-        turn_guesses = state_guesses[turn]
         """
         Overrides Game.actions()
 
         """
+        stateGuesses = self.getGuesses()
+        turn = self.getTurn()
+        turnGuesses = stateGuesses[turn]
 
         alphabet = string.ascii_uppercase
         actions = []
         for l in alphabet[:self.height]:
             for n in range(1, self.width + 1):
-                str_move = l + str(n)
-                if str_move not in turn_guesses:
-                    actions.append(str_move)
+                strMove = l + str(n)
+                if strMove not in turnGuesses:
+                    actions.append(strMove)
 
         return actions
 
     def transition(self, action):
-        state_guesses = self.get_guesses()
-        turn = self.get_turn()
         """
         Overrides Game.transition()
 
         """
+        stateGuesses = self.getGuesses()
+        turn = self.getTurn()
 
         # Update guesses
-        state_guesses[turn].append(action)
-        self.state[0][1] = state_guesses[0]
-        self.state[1][1] = state_guesses[1]
+        stateGuesses[turn].append(action)
+        self.state[0][1] = stateGuesses[0]
+        self.state[1][1] = stateGuesses[1]
 
         # Update board
-        op_turn = (turn + 1) % 2
-        op_board = self.state[op_turn][0]
+        opTurn = (turn + 1) % 2
+        opBoard = self.state[opTurn][0]
 
-        action_y, action_x = action[0], action[1:]
-        action_x = int(action_x) - 1
-        action_y = ord(action_y) - ord('A')
+        actionY, actionX = action[0], action[1:]
+        actionX = int(actionX) - 1
+        actionY = ord(actionY) - ord('A')
 
-        cur_pos = op_board[action_y][action_x]
+        curPos = opBoard[actionY][actionX]
 
-        if cur_pos == 0:
-            op_board[action_y][action_x] = 3
-        elif cur_pos == 1:
-            op_board[action_y][action_x] = 2
+        if curPos == 0:
+            opBoard[actionY][actionX] = 3
+        elif curPos == 1:
+            opBoard[actionY][actionX] = 2
         else:
             raise Exception("invalid action")
 
-        self.state[op_turn][0] = op_board
+        self.state[opTurn][0] = opBoard
 
     def gameOver(self):
         """
@@ -154,69 +154,69 @@ class Battleship(BoardGame):
         boards = (self.state[0][0], self.state[1][0])
 
         for player, board in enumerate(boards):
-            total_hit = 0
+            totalHit = 0
             for i in range(self.height):
                 for j in range(self.width):
                     if board[i][j] == 2:
-                        total_hit += 1
-            if total_hit == 17:
+                        totalHit += 1
+            if totalHit == 17:
                 self.winner = (player + 1) % 2
                 return True
         return False
 
-    def check_available(self, board, pos_x, pos_y):
-        bounds_x = (0 <= pos_x) and (pos_x < self.width)
-        bounds_y = (0 <= pos_y) and (pos_y < self.height)
-        if not (bounds_x and bounds_y):
+    def checkAvailable(self, board, posX, posY):
+        boundsX = (0 <= posX) and (posX < self.width)
+        boundsY = (0 <= posY) and (posY < self.height)
+        if not (boundsX and boundsY):
             return False
 
-        return board[pos_y][pos_x] != 1
+        return board[posY][posX] != 1
 
-    def place_ship(self, board, ship_size):
+    def placeShip(self, board, shipSize):
         width = self.width
         height = self.height
 
         while True:
             orientation = random.randint(0, 3)
-            pos_x = random.randint(0, width - 1)
-            pos_y = random.randint(0, height - 1)
-            board_copy = copy.deepcopy(board)
+            posX = random.randint(0, width - 1)
+            posY = random.randint(0, height - 1)
+            boardCopy = copy.deepcopy(board)
 
-            can_place = True
+            canPlace = True
             if orientation == 0:
-                for i in range(ship_size):
-                    can_place = self.check_available(board_copy, pos_x + i, pos_y)
-                    if can_place:
-                        board_copy[pos_y][pos_x + i] = 1
+                for i in range(shipSize):
+                    canPlace = self.checkAvailable(boardCopy, posX + i, posY)
+                    if canPlace:
+                        boardCopy[posY][posX + i] = 1
                     else:
                         break
             elif orientation == 1:
-                for i in range(ship_size):
-                    can_place = self.check_available(board_copy, pos_x, pos_y + i)
-                    if can_place:
-                        board_copy[pos_y + i][pos_x] = 1
+                for i in range(shipSize):
+                    canPlace = self.checkAvailable(boardCopy, posX, posY + i)
+                    if canPlace:
+                        boardCopy[posY + i][posX] = 1
                     else:
                         break
             elif orientation == 2:
-                for i in range(ship_size):
-                    can_place = self.check_available(board_copy, pos_x, pos_y - i)
-                    if can_place:
-                        board_copy[pos_y - i][pos_x] = 1
+                for i in range(shipSize):
+                    canPlace = self.checkAvailable(boardCopy, posX, posY - i)
+                    if canPlace:
+                        boardCopy[posY - i][posX] = 1
                     else:
                         break
             if orientation == 3:
-                for i in range(ship_size):
-                    can_place = self.check_available(board_copy, pos_x - i, pos_y)
-                    if can_place:
-                        board_copy[pos_y][pos_x - i] = 1
+                for i in range(shipSize):
+                    canPlace = self.checkAvailable(boardCopy, posX - i, posY)
+                    if canPlace:
+                        boardCopy[posY][posX - i] = 1
                     else:
                         break
-            if can_place:
-                return board_copy
-    def place_ships(self, board):
-        ship_sizes = [5, 4, 3, 3, 2]
-        for ship_size in ship_sizes:
-            board = self.place_ship(board, ship_size)
+            if canPlace:
+                return boardCopy
+    def placeShips(self, board):
+        shipSizes = [5, 4, 3, 3, 2]
+        for shipSize in shipSizes:
+            board = self.placeShip(board, shipSize)
         return board
 
         """
@@ -228,57 +228,58 @@ class Battleship(BoardGame):
         """
 
     def displayState(self):
-        op_display_map = {
         """
         Overrides BoardGame.displayState()
 
         """
+        opDisplayMap = {
             0: " ",
             1: " ",
             2: "X",
             3: "O"
         }
 
-        display_map = {
+        displayMap = {
             0: " ",
             1: "*",
             2: "X",
             3: "O"
         }
 
-        turn = self.get_turn()
+        turn = self.getTurn()
         board = self.state[turn][0]
 
-        op_turn = (turn + 1) % 2
-        op_board = self.state[op_turn][0]
+        opTurn = (turn + 1) % 2
+        opBoard = self.state[opTurn][0]
 
         board_disp = "Target board\n"
         head = " |"
         for i in range(1, self.width + 1):
             head += str(i) + "|"
         head += "\n"
-        row_sep = "-" * 2 * (self.width + 1) + "\n"
+        rowSep = "-" * 2 * (self.width + 1) + "\n"
 
-        board_disp += head + row_sep
+        boardDisp += head + rowSep
 
         alphabet = string.ascii_uppercase
         for i in range(self.height):
             row = alphabet[i] + "|"
             for j in range(self.width):
-                row += op_display_map[op_board[i][j]] + "|"
+                row += opDisplayMap[opBoard[i][j]] + "|"
             row += "\n"
-            board_disp += row + row_sep
+            boardDisp += row + rowSep
 
-        board_disp += "\n"
-        board_disp += "Your board\n"
-        board_disp += head + row_sep
+        opTurn = (opTurn + 1) % 2
+        boardDisp += "\n"
+        boardDisp += players[opTurn].name + str("\n")
+        boardDisp += head + rowSep
         for i in range(self.height):
             row = alphabet[i] + "|"
             for j in range(self.width):
-                row += display_map[board[i][j]] + "|"
+                row += displayMap[board[i][j]] + "|"
             row += "\n"
-            board_disp += row + row_sep
-        print(board_disp)
+            boardDisp += row + rowSep
+        print(boardDisp)
 
 if __name__ == "__main__":
     battleship = Battleship(10, 10)
