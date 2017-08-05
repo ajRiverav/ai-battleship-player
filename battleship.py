@@ -2,6 +2,11 @@ import string
 import copy
 import random
 
+def randomNameGen():
+    return (random.choice(string.ascii_uppercase) + \
+            random.choice(['a', 'e', 'i', 'o', 'u']) + \
+            random.choice(['a', 'e', 'i', 'o', 'u']))
+
 class Game(object):
     def __init__(self):
         self.state = None
@@ -41,6 +46,13 @@ class BoardGame(Game):
             self.transition(move)
             turn += 1
         self.displayGameEnd()
+class Player(object):
+    def __init__(self, name=None):
+        if name is None:
+            self.name = randomNameGen()
+        else:
+            self.name = name
+
 
 class HumanPlayer(object):
     def play(self, state, actions):
