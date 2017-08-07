@@ -19,12 +19,14 @@ import random
 import numpy as np
 from enum import Enum
 import tensorflow as tf
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 class SHOT_RESULT(Enum):
     INVALID = 0
     HIT = 1
-    MISS = 2
+    SINK = 2
+    MISS = 3
+
 
 class GAME_STATUS(Enum):
     IN_PROGRESS = 0
@@ -32,11 +34,12 @@ class GAME_STATUS(Enum):
 
 RewardFun = {SHOT_RESULT.MISS:-1,\
              SHOT_RESULT.HIT:1,\
-             SHOT_RESULT.INVALID:-100}
+             SHOT_RESULT.SINK:50,\
+             SHOT_RESULT.INVALID:-50}
 
 def genShipCoords(shipSize, minCoord, maxCoord):
     coordinates = [0]*shipSize
-    coordinates[0] = random.randint(minCoord, maxCoord)
+    coordinates[0] = random.randint(minCoord, maxCoord-1)
     for i in range(1,shipSize):
         coordinates[i] = coordinates[i-1] + 1 if coordinates[i-1] < maxCoord else coordinates[i-1]-1
     return coordinates
@@ -74,7 +77,7 @@ class SimpleBattleship(object):
             self.shotsTakenSofar.append(shotCoordinate)
 
             # Cannot play outside the board
-            if not 0 <= shotCoordinate <= self.numBoardCols:
+            if not 0 <= shotCoordinate <= self.numBoardCols-1:
                 # Invalid
                 # update crossHair to be outside board = all zero
                 self.updateCrossHairCoord(range(0,self.numBoardCols), 0)
@@ -87,7 +90,7 @@ class SimpleBattleship(object):
                 self.updateCrossHairCoord(shotCoordinate)
 
                 # Did we sink the ship?
-                if sum(self.board[0, :]==1)==2:
+                if sum(self.board[0,:]==1)==2:
                     return self.getState(), RewardFun[SHOT_RESULT.HIT], GAME_STATUS.COMPLETE
                 else:
                     return self.getState(), RewardFun[SHOT_RESULT.HIT], GAME_STATUS.IN_PROGRESS
@@ -106,25 +109,25 @@ class SimpleBattleship(object):
         self.board[0,coord] = val
 
 # Set-up
-NUM_EPISODES = 1000
+NUM_EPISODES = 5000
 BOARD_SIZE = (1,10)
 SHIP_SIZE = 2
 
 ship = genShipCoords(SHIP_SIZE, BOARD_SIZE[0], BOARD_SIZE[1])
 print("SHIP LOCATION:{}".format(ship))
-actionSet = (-1,1) #LEFT=-1, RIGHT= +1
+actionSet = (-2,-1,0,1,2) #LEFT=-1, RIGHT= +1
 
 # Neural Network for Q-table (aka Q-network)
 tf.reset_default_graph()
 
 #These lines establish the feed-forward part of the network used to choose actions
 inputs1 = tf.placeholder(shape=[2,BOARD_SIZE[1]],dtype=tf.float32)
-W = tf.Variable(tf.random_uniform([BOARD_SIZE[1],1],0,0.01)) #
+W = tf.Variable(tf.random_uniform([BOARD_SIZE[1],5],0,0.01)) #
 Qout = tf.matmul(inputs1,W)
-predict = tf.argmax(Qout,0)
+predict = tf.argmax(Qout,1)
 
 #Below we obtain the loss by taking the sum of squares difference between the target and prediction Q values.
-nextQ = tf.placeholder(shape=[2,1],dtype=tf.float32)
+nextQ = tf.placeholder(shape=[2,5],dtype=tf.float32)
 loss = tf.reduce_sum(tf.square(nextQ - Qout))
 trainer = tf.train.GradientDescentOptimizer(learning_rate=0.1)
 updateModel = trainer.minimize(loss)
@@ -133,7 +136,7 @@ init = tf.global_variables_initializer()
     
 # Set learning parameters
 y = .7
-e = 0.1
+e = 0.3
 #create lists to contain total rewards and steps per episode
 jList = []
 rList = []
@@ -158,12 +161,14 @@ with tf.Session() as sess:
 
             if np.random.rand(1) < e:
                 actionIdx = [random.randint(0,len(actionSet)-1)]
+                print(actionIdx)
             #Get new state and reward from environment
             crossHair += actionSet[actionIdx[0]]
 
-            s1,r, gameStatus = game.fireShot(crossHair) #0:MISS, 1:HIT, 2:INVALID
+            s1, r, gameStatus = game.fireShot(crossHair)
             print(str(j)+"\n")
             print(s1)
+            print("actionIdx[0]:" + str(actionIdx[0]))
 
             if gameStatus == GAME_STATUS.COMPLETE:
                 termEpisode = True
@@ -174,7 +179,7 @@ with tf.Session() as sess:
             #Obtain maxQ' and set our target value for chosen action.
             maxQ1 = np.max(Q1)
             targetQ = allQ
-            targetQ[actionIdx[0]] = r + y*maxQ1
+            targetQ[0,actionIdx[0]] = r + y*maxQ1
             #Train our network using target and predicted Q values
             _,W1 = sess.run([updateModel,W],feed_dict={inputs1:s,nextQ:targetQ})
             rAll += r
@@ -189,4 +194,5 @@ with tf.Session() as sess:
         rList.append(rAll)
 
 plt.plot(rList)
+plt.show()
 
