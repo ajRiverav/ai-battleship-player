@@ -32,10 +32,10 @@ class GAME_STATUS(Enum):
     IN_PROGRESS = 0
     COMPLETE = 1
 
-RewardFun = {SHOT_RESULT.MISS:-1,\
+RewardFun = {SHOT_RESULT.MISS:0,\
              SHOT_RESULT.HIT:1,\
-             SHOT_RESULT.SINK:50,\
-             SHOT_RESULT.INVALID:-50}
+             SHOT_RESULT.SINK:2,\
+             SHOT_RESULT.INVALID:-2}
 
 def genShipCoords(shipSize, minCoord, maxCoord):
     coordinates = [0]*shipSize
@@ -71,7 +71,7 @@ class SimpleBattleship(object):
         # Cannot take the same shot twice
         if shotCoordinate in self.shotsTakenSofar:
             self.updateCrossHairCoord(shotCoordinate)
-            return self.getState(), RewardFun[SHOT_RESULT.INVALID], GAME_STATUS.COMPLETE
+            return self.getOneDimState(), RewardFun[SHOT_RESULT.INVALID], GAME_STATUS.COMPLETE
 
         else:
             self.shotsTakenSofar.append(shotCoordinate)
@@ -81,7 +81,7 @@ class SimpleBattleship(object):
                 # Invalid
                 # update crossHair to be outside board = all zero
                 self.updateCrossHairCoord(range(0,self.numBoardCols), 0)
-                return self.getState(), RewardFun[SHOT_RESULT.INVALID], GAME_STATUS.COMPLETE
+                return self.getOneDimState(), RewardFun[SHOT_RESULT.INVALID], GAME_STATUS.COMPLETE
 
             elif shotCoordinate in self.shipCoords:
                 # Hit
@@ -90,44 +90,53 @@ class SimpleBattleship(object):
                 self.updateCrossHairCoord(shotCoordinate)
 
                 # Did we sink the ship?
-                if sum(self.board[0,:]==1)==2:
-                    return self.getState(), RewardFun[SHOT_RESULT.HIT], GAME_STATUS.COMPLETE
+                sunk = True
+                for coord in self.shipCoords:
+                    if coord not in self.shotsTakenSofar:
+                        sunk = False
+                if sunk:
+                    return self.getOneDimState(), RewardFun[SHOT_RESULT.HIT], GAME_STATUS.COMPLETE
                 else:
-                    return self.getState(), RewardFun[SHOT_RESULT.HIT], GAME_STATUS.IN_PROGRESS
+                    return self.getOneDimState(), RewardFun[SHOT_RESULT.HIT], GAME_STATUS.IN_PROGRESS
 
             else:
                 # Miss
                 self.updateState(shotCoordinate, -1)
                 # The crosshair moves to where we fired at.
                 self.updateCrossHairCoord(shotCoordinate)
-                return self.getState(), RewardFun[SHOT_RESULT.MISS], GAME_STATUS.IN_PROGRESS
+                return self.getOneDimState(), RewardFun[SHOT_RESULT.MISS], GAME_STATUS.IN_PROGRESS
 
     def getState(self):
         return self.board
+
+    def getOneDimState(self):
+        return self.board.reshape( (1,self.board.size) )
     
     def updateState(self,coord, val):
         self.board[0,coord] = val
 
 # Set-up
-NUM_EPISODES = 5000
+NUM_EPISODES = 3000
 BOARD_SIZE = (1,10)
 SHIP_SIZE = 2
 
-ship = genShipCoords(SHIP_SIZE, BOARD_SIZE[0], BOARD_SIZE[1])
+
+#ship = genShipCoords(SHIP_SIZE, BOARD_SIZE[0], BOARD_SIZE[1])
+ship = [5,6]
 print("SHIP LOCATION:{}".format(ship))
-actionSet = (-2,-1,0,1,2) #LEFT=-1, RIGHT= +1
+actionSet = (-1,1) #LEFT=-1, RIGHT= +1
 
 # Neural Network for Q-table (aka Q-network)
 tf.reset_default_graph()
 
 #These lines establish the feed-forward part of the network used to choose actions
-inputs1 = tf.placeholder(shape=[2,BOARD_SIZE[1]],dtype=tf.float32)
-W = tf.Variable(tf.random_uniform([BOARD_SIZE[1],5],0,0.01)) #
+inputs1 = tf.placeholder(shape=[1,BOARD_SIZE[1]*2],dtype=tf.float32)
+W = tf.Variable(tf.random_uniform([BOARD_SIZE[1]*2,len(actionSet)],0,0.01))
 Qout = tf.matmul(inputs1,W)
 predict = tf.argmax(Qout,1)
 
 #Below we obtain the loss by taking the sum of squares difference between the target and prediction Q values.
-nextQ = tf.placeholder(shape=[2,5],dtype=tf.float32)
+nextQ = tf.placeholder(shape=[1,len(actionSet)],dtype=tf.float32)
 loss = tf.reduce_sum(tf.square(nextQ - Qout))
 trainer = tf.train.GradientDescentOptimizer(learning_rate=0.1)
 updateModel = trainer.minimize(loss)
@@ -135,8 +144,8 @@ updateModel = trainer.minimize(loss)
 init = tf.global_variables_initializer()
     
 # Set learning parameters
-y = .7
-e = 0.3
+y = 0.9
+e = 0.1
 #create lists to contain total rewards and steps per episode
 jList = []
 rList = []
@@ -145,30 +154,30 @@ with tf.Session() as sess:
     for i in range(NUM_EPISODES):
         #Reset environment and get first new observation
         game = SimpleBattleship(ship, BOARD_SIZE[0], BOARD_SIZE[1])
-        s = game.getState()
+        s = game.getOneDimState()
         crossHair = 0
 
         rAll = 0
         termEpisode = False
         j = 0
         #The Q-Network
-        print("New Episode")
+        print("New Episode #" + str(i))
         print(game.getState())
         while j < 20: #should never need more than 10 (max number of legal moves if board size is 10
             j+=1
             #Choose an action by greedily (with e chance of random action) from the Q-network
-            actionIdx,allQ = sess.run([predict,Qout],feed_dict={inputs1:s})
+            actionIdx,allQ,Wnn = sess.run([predict,Qout,W],feed_dict={inputs1:s})
 
             if np.random.rand(1) < e:
                 actionIdx = [random.randint(0,len(actionSet)-1)]
-                print(actionIdx)
+                #print(actionIdx)
             #Get new state and reward from environment
             crossHair += actionSet[actionIdx[0]]
 
             s1, r, gameStatus = game.fireShot(crossHair)
             print(str(j)+"\n")
-            print(s1)
-            print("actionIdx[0]:" + str(actionIdx[0]))
+            print(game.getState())
+            print("actionIdx[0]:" + str(actionSet[actionIdx[0]]))
 
             if gameStatus == GAME_STATUS.COMPLETE:
                 termEpisode = True
@@ -181,14 +190,15 @@ with tf.Session() as sess:
             targetQ = allQ
             targetQ[0,actionIdx[0]] = r + y*maxQ1
             #Train our network using target and predicted Q values
-            _,W1 = sess.run([updateModel,W],feed_dict={inputs1:s,nextQ:targetQ})
+            _,Wnn1 = sess.run([updateModel,W],feed_dict={inputs1:s,nextQ:targetQ})
+            Wdiff = Wnn-Wnn1
             rAll += r
 
             s = s1
 
             if termEpisode == True:
                 #Reduce chance of random action as we train the model.
-                e = 1./((i/50) + 10)
+                e -= e*0.01
                 break
         jList.append(j)
         rList.append(rAll)
