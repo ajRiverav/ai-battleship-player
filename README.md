@@ -1,4 +1,4 @@
-# aiBattleshipPlayer
+# ai-battleship-player
 
 # An AI Battleship Player
 
