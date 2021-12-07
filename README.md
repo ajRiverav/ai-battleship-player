@@ -6,7 +6,7 @@
 
 ## OVERVIEW
 
-I would like to assemble a group of people interested in building an artificially intelligent Battleship player trained using Deep Reinforcement Learning (RL). The motivation comes from a desire to observe how an AI player develops strategies that a human could form on its own. For example, it is common for humants to "fire" shots near previous hits of an unsunk ship. It would be interesting to see if the AI player can "learn" this. I would like to develop the player from end-to-end, as a team. Check out the tasks section to see what are the things I will be doing.
+I would like to assemble a group of people interested in building an artificially intelligent Battleship player trained using Deep Reinforcement Learning (RL). The motivation comes from a desire to observe how an AI player develops strategies that a human could form on its own. For example, it is common for humants to "fire" shots near previous hits of an floating ship. It would be interesting to see if the AI player can "learn" this. I would like to develop the player from end-to-end, as a team. Check out the tasks section to see what are the things I will be doing.
 
 ## GOALS
 
