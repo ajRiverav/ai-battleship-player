@@ -40,12 +40,7 @@ B1. A defender that wins against a search &amp; hunt-strategy player. Search and
 
 - Python (to code the game)
 - Google Tensor Flow (for the Neural Network)
-- Other scripting languages that you may know.
 - Everything will be hosted on github - public repo (don&#39;t know which license yet)
-- GIt
-- Github&#39;s bug tracking system
-- Trello (for project management)
-- Other tools that you may suggest
 
 ## TASKS IDENTIFIED SO FAR
 
