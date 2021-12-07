@@ -24,11 +24,11 @@ A timeline has not been established yet, but it would be nice to reach Milestone
 
 Board size is 10x10 squares.
 
-A1. An attacking player that can sink a fleet in less than 80 shots on average after playing 1,000 games.
+A1. An attacking player that can sink a fleet with less than 80 shots on average after playing 1,000 games.
 
-A2. An attacking player that can sink a fleet in less than 60 shots on average after playing 1,000 games.
+A2. An attacking player that can sink a fleet with less than 60 shots on average after playing 1,000 games.
 
-A3. An attacking player that can sink a fleet in less than 40 shots on average after playing 1,000 games.
+A3. An attacking player that can sink a fleet with less than 40 shots on average after playing 1,000 games.
 
 B1. A defender that wins against a random-strategy player.
 
