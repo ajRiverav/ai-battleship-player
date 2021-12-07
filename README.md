@@ -12,7 +12,7 @@ To create an AI Battleship Player
 
 ## NOTIONAL PLAN
 
-The approach will be to use a Deep Neural Network (DNN) and train it using a reinforcement learning. To be able to train the DNN, we first need to identify an existing Battleship game engine or build our own. This will allow us to write scripts that run the game.
+The approach will be to use a Deep Neural Network (DNN) and train it using reinforcement learning. To be able to train the DNN, we first need to identify an existing Battleship game engine or build our own. This will allow us to write scripts that run the game.
 
 Reinforcement learning is all about the agent (the DNN) interacting with the environment (the game) in a way that some reward (hit/miss/win) is maximized. During the first part, the DNN will be trained to devise the best strategy to attack and sink all the ships with the fewest number of shots possible. During the second part, the DNN will be trained to devise the best strategy to defend its ships. The only strategy involved in defending the ships is their placement at the beginning of the game. This defender can be trained using our attacker by playing them against each other, similar to what the Google folks did with AlphaGo.
 
