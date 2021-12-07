@@ -4,18 +4,17 @@
 
 **AJ Rivera**
 
-OVERVIEW
+## OVERVIEW
 
 I would like to assemble a group of people interested in building an artificially intelligent Battleship player trained using Deep Reinforcement Learning (RL). The motivation comes from a desire to observe how an AI player develops strategies that a human could form on its own. For example, it is common for humants to "fire" shots near previous hits of an unsunk ship. It would be interesting to see if the AI player can "learn" this. I would like to develop the player from end-to-end, as a team. Check out the tasks section to see what are the things I will be doing.
 
-GOALS
+## GOALS
 
-1. To create an AI Battleship Player,
-2. To partake on a project as part of a team.
+To create an AI Battleship Player
 
-NOTIONAL PLAN
+## NOTIONAL PLAN
 
-The approach will be to use a Deep Neural Network (DNN) and train it using a reinforcement learning. To be able to train the DNN, we first need to identify an existing Battleship game engine, or build our own. This will allow us to write scripts that run the game.
+The approach will be to use a Deep Neural Network (DNN) and train it using a reinforcement learning. To be able to train the DNN, we first need to identify an existing Battleship game engine or build our own. This will allow us to write scripts that run the game.
 
 Reinforcement learning is all about the agent (the DNN) interacting with the environment (the game) in a way that some reward (hit/miss/win) is maximized. During the first part, the DNN will be trained to devise the best strategy to attack and sink all the ships with the fewest number of shots possible. During the second part, the DNN will be trained to devise the best strategy to defend its ships. The only strategy involved in defending the ships is their placement at the beginning of the game. This defender can be trained using our attacker by playing them against each other, similar to what the Google folks did with AlphaGo.
 
@@ -23,7 +22,7 @@ Some decisions will be made along the way, for example, the reinforcement learni
 
 A timeline has not been established yet, but it would be nice to reach Milestone B1 before Christmas 2017.
 
-MILESTONES
+## MILESTONES
 
 Board size is 10x10 squares.
 
@@ -37,7 +36,7 @@ B1. A defender that wins against a random-strategy player.
 
 B1. A defender that wins against a search &amp; hunt-strategy player. Search and hunt means that upon a hit, the attacker focused on adjacent squares.
 
-TOOLS &amp; PROGRAMMING LANGUAGES WE WILL MOST LIKELY USE
+## TOOLS &amp; PROGRAMMING LANGUAGES WE WILL MOST LIKELY USE
 
 - Python (to code the game)
 - Google Tensor Flow (for the Neural Network)
@@ -48,7 +47,7 @@ TOOLS &amp; PROGRAMMING LANGUAGES WE WILL MOST LIKELY USE
 - Trello (for project management)
 - Other tools that you may suggest
 
-TASKS IDENTIFIED SO FAR
+## TASKS IDENTIFIED SO FAR
 
 1. Identify or build our own Python-based Battleship player.
 2. Identify reinforcement training algorithm.
