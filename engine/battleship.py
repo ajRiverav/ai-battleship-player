@@ -33,7 +33,7 @@ class BoardGame(Game):
     def playGame(self, players):
         """
         Overrides Game.playGame()
-        
+
         """
         self.startGame()
         turn = 0
@@ -43,8 +43,8 @@ class BoardGame(Game):
             self.displayState(players)
             player = players[turn % len(players)]
             move = player.play(self.state, self.actions())
-            self.transition(move)
-            turn += 1
+            if self.transition(move):
+                turn += 1
         self.displayGameEnd(players)
 
 
@@ -88,11 +88,14 @@ class RandomShotsPlayer(Player):
 #
 # 2 lists recording each player's moves
 #
+# 2 aim positions
+#
 
 class Battleship(BoardGame):
     def __init__(self, width, height):
         self.width = width
         self.height = height
+        self.moves = ['up', 'down', 'left', 'right', 'fire']
 
     def getGuesses(self):
         return [self.state[0][1], self.state[1][1]]
@@ -103,6 +106,10 @@ class Battleship(BoardGame):
         turn = numGuesses % 2
         return turn
 
+    def getAim(self):
+        turn = self.getTurn()
+        return self.state[turn][2]
+
     def startGame(self):
         """
         Overrides Game.startGame()
@@ -112,26 +119,14 @@ class Battleship(BoardGame):
         boardCopy = copy.deepcopy(board)
         board = self.placeShips(board)
         boardCopy = self.placeShips(boardCopy)
-        self.state = [[board, []], [boardCopy, []]]
+        self.state = [[board, [], [0, 0]], [boardCopy, [], [0, 0]]]
 
     def actions(self):
         """
         Overrides Game.actions()
 
         """
-        stateGuesses = self.getGuesses()
-        turn = self.getTurn()
-        turnGuesses = stateGuesses[turn]
-
-        alphabet = string.ascii_uppercase
-        actions = []
-        for l in alphabet[:self.height]:
-            for n in range(1, self.width + 1):
-                strMove = l + str(n)
-                if strMove not in turnGuesses:
-                    actions.append(strMove)
-
-        return actions
+        return self.moves
 
     def transition(self, action):
         """
@@ -140,30 +135,49 @@ class Battleship(BoardGame):
         """
         stateGuesses = self.getGuesses()
         turn = self.getTurn()
+        aimX, aimY = self.getAim()
 
-        # Update guesses
-        stateGuesses[turn].append(action)
-        self.state[0][1] = stateGuesses[0]
-        self.state[1][1] = stateGuesses[1]
+        makeTransition = False
 
-        # Update board
-        opTurn = (turn + 1) % 2
-        opBoard = self.state[opTurn][0]
-
-        actionY, actionX = action[0], action[1:]
-        actionX = int(actionX) - 1
-        actionY = ord(actionY) - ord('A')
-
-        curPos = opBoard[actionY][actionX]
-
-        if curPos == 0:
-            opBoard[actionY][actionX] = 3
-        elif curPos == 1:
-            opBoard[actionY][actionX] = 2
+        if action == 'up':
+            aimY = max(0, aimY - 1)
+        elif action == 'down':
+            aimY = min(self.height - 1, aimY + 1)
+        elif action == 'left':
+            aimX = max(0, aimX - 1)
+        elif action == 'right':
+            aimX = min(self.width - 1, aimX + 1)
+        elif action == 'fire':
+            makeTransition = True
         else:
-            raise Exception("invalid action")
+            raise Exception('Invalid move: {}'.format(action))
 
-        self.state[opTurn][0] = opBoard
+        if makeTransition:
+            # Update guesses
+            stateGuesses[turn].append(action)
+
+            # Update board
+            opTurn = (turn + 1) % 2
+            opBoard = self.state[opTurn][0]
+
+            print(aimY, aimX)
+            curPos = opBoard[aimY][aimX]
+
+            if curPos == 0:
+                opBoard[aimY][aimX] = 3
+            elif curPos == 1:
+                opBoard[aimY][aimX] = 2
+            else:
+                return False
+
+            self.state[0][1] = stateGuesses[0]
+            self.state[1][1] = stateGuesses[1]
+
+            self.state[opTurn][0] = opBoard
+        else:
+            self.state[turn][2] = [aimX, aimY]
+
+        return makeTransition
 
     def gameOver(self):
         """
