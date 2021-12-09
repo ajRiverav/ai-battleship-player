@@ -2,6 +2,17 @@
 
 # An AI Battleship Player
 
+## Setup (assumes macOS)
+1. Set up a virtual env
+>  python3 -m venv venv 
+2. Active the virtual env (assumes bash shell)
+> source venv/bin/activate 
+An indication that the virtual env has been activated is "(venv)" in your prompt. 
+3. Install requirements
+> pip3 install -r requirements.txt 
+4. To deactivate the virtual env
+> deactivate
+
 ## OVERVIEW
 
 I would like to assemble a group of people interested in building an artificially intelligent Battleship player trained using Deep Reinforcement Learning (RL). The motivation comes from a desire to observe how an AI player develops strategies that a human could form on its own. For example, it is common for humants to "fire" shots near previous hits of an floating ship. It would be interesting to see if the AI player can "learn" this. I would like to develop the player from end-to-end, as a team. Check out the tasks section to see what are the things I will be doing.
